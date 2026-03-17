@@ -1,17 +1,17 @@
 {
-  "name": "@browserbasehq/mcp-server-browserbase",
-  "version": "2.4.3",
-  "description": "MCP server for AI web browser automation using Browserbase and Stagehand",
-  "mcpName": "io.github.browserbase/mcp-server-browserbase",
+  "name": "@knossos/mcp-stagehand",
+  "version": "1.0.0",
+  "description": "MCP server for AI browser automation via Stagehand — LOCAL mode + Anthropic CUA support. Fork of @browserbasehq/mcp-server-browserbase.",
+  "mcpName": "io.github.autom8y/mcp-stagehand",
   "license": "Apache-2.0",
-  "author": "Browserbase, Inc. (https://www.browserbase.com/)",
-  "homepage": "https://www.browserbase.com",
-  "bugs": "https://github.com/modelcontextprotocol/servers/issues",
+  "author": "autom8y (forked from Browserbase, Inc.)",
+  "homepage": "https://github.com/autom8y/mcp-stagehand",
+  "bugs": "https://github.com/autom8y/mcp-stagehand/issues",
   "type": "module",
   "main": "./cli.js",
   "module": "./src/index.ts",
   "bin": {
-    "mcp-server-browserbase": "cli.js"
+    "knossos-mcp-stagehand": "cli.js"
   },
   "files": [
     "assets",
@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "@browserbasehq/sdk": "^2.6.0",
-    "@browserbasehq/stagehand": "^3.0.8",
+    "@browserbasehq/stagehand": "^3.1.0",
     "@mcp-ui/server": "^5.10.0",
     "@modelcontextprotocol/sdk": "^1.13.1",
     "commander": "^14.0.0",

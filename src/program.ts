@@ -32,8 +32,12 @@ const packageJSON = JSON.parse(packageJSONBuffer.toString());
 program
   .version("Version " + packageJSON.version)
   .name(packageJSON.name)
-  .option("--browserbaseApiKey <key>", "The Browserbase API Key to use")
-  .option("--browserbaseProjectId <id>", "The Browserbase Project ID to use")
+  .option("--env <env>", "Environment: LOCAL or BROWSERBASE (default: LOCAL)", process.env.STAGEHAND_ENV || "LOCAL")
+  .option("--headless [boolean]", "Run local browser headless (LOCAL mode only)", true)
+  .option("--cuaModel <model>", "CUA model name (default: anthropic/claude-sonnet-4-6)")
+  .option("--cuaApiKey <key>", "CUA model API key")
+  .option("--browserbaseApiKey <key>", "The Browserbase API Key to use (BROWSERBASE mode)")
+  .option("--browserbaseProjectId <id>", "The Browserbase Project ID to use (BROWSERBASE mode)")
   .option("--proxies", "Use Browserbase proxies.")
   .option(
     "--advancedStealth",

@@ -2,11 +2,16 @@ import type { AvailableModelSchema } from "@browserbasehq/stagehand";
 
 export type Config = {
   /**
-   * Browserbase API Key to authenticate requests
+   * Environment mode: LOCAL launches a local Chromium, BROWSERBASE uses cloud.
+   * @default "LOCAL"
+   */
+  env?: "LOCAL" | "BROWSERBASE";
+  /**
+   * Browserbase API Key to authenticate requests (required in BROWSERBASE mode)
    */
   browserbaseApiKey: string;
   /**
-   * Browserbase Project ID associated with the API key
+   * Browserbase Project ID associated with the API key (required in BROWSERBASE mode)
    */
   browserbaseProjectId: string;
   /**
@@ -104,4 +109,21 @@ export type Config = {
    * @default false
    */
   experimental?: boolean;
+  /**
+   * CUA (Computer Use Agent) model name
+   * @default "anthropic/claude-sonnet-4-6"
+   */
+  cuaModel?: string;
+  /**
+   * CUA model API key (falls back to ANTHROPIC_API_KEY)
+   */
+  cuaApiKey?: string;
+  /**
+   * Local browser launch options (LOCAL mode only)
+   */
+  localBrowserLaunchOptions?: {
+    headless?: boolean;
+    executablePath?: string;
+    args?: string[];
+  };
 };

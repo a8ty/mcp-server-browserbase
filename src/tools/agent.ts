@@ -7,8 +7,9 @@ import type { ToolActionResult } from "../types/types.js";
  * Stagehand Agent
  * Docs: https://docs.stagehand.dev/basics/agent
  *
- * This tool uses Gemini Computer Use to autonomously complete web-based tasks.
+ * This tool uses Computer Use Agent (CUA) mode to autonomously complete web-based tasks.
  * The agent will navigate, interact, and complete the task described in the prompt.
+ * Supports Anthropic (claude-sonnet-4-6), Gemini, and other CUA-capable models.
  */
 
 const AgentInputSchema = z.object({
@@ -24,7 +25,7 @@ type AgentInput = z.infer<typeof AgentInputSchema>;
 
 const agentSchema: ToolSchema<typeof AgentInputSchema> = {
   name: "browserbase_stagehand_agent",
-  description: `Execute a task autonomously using Gemini Computer Use agent. The agent will navigate and interact with web pages to complete the given task.`,
+  description: `Execute a task autonomously using Computer Use Agent (CUA). The agent will navigate and interact with web pages to complete the given task. Supports Anthropic, Gemini, and other CUA-capable models.`,
   inputSchema: AgentInputSchema,
 };
 
@@ -36,15 +37,21 @@ async function handleAgent(
     try {
       const stagehand = await context.getStagehand();
 
-      // You need to provide GOOGLE_GENERATIVE_AI_API_KEY
+      // CUA model configurable via env vars (default: Anthropic claude-sonnet-4-6)
+      const cuaModel =
+        process.env.CUA_MODEL || "anthropic/claude-sonnet-4-6";
+      const cuaApiKey =
+        process.env.CUA_API_KEY ||
+        process.env.ANTHROPIC_API_KEY ||
+        process.env.GEMINI_API_KEY ||
+        process.env.GOOGLE_API_KEY ||
+        process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+
       const agent = stagehand.agent({
-        cua: true,
+        mode: "cua",
         model: {
-          modelName: "google/gemini-2.5-computer-use-preview-10-2025",
-          apiKey:
-            process.env.GEMINI_API_KEY ||
-            process.env.GOOGLE_API_KEY ||
-            process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+          modelName: cuaModel,
+          apiKey: cuaApiKey,
         },
       });
 
