@@ -112,11 +112,25 @@ export const configSchema = z
 
 // Default function for Smithery
 export default function ({ config }: { config: z.infer<typeof configSchema> }) {
-  if (!config.browserbaseApiKey) {
-    throw new Error("browserbaseApiKey is required");
-  }
-  if (!config.browserbaseProjectId) {
-    throw new Error("browserbaseProjectId is required");
+  // WS-F defensive gate: in LOCAL mode (STAGEHAND_ENV=LOCAL, driven via CDP
+  // against a system Chrome binary) neither BROWSERBASE_API_KEY nor
+  // BROWSERBASE_PROJECT_ID is used for any Browserbase cloud call — the keys are
+  // purely passed through so the package's own startup checks don't abort.
+  // Gate the throws on env !== LOCAL so local-mode operators can run without
+  // Browserbase credentials. Cloud/remote mode (env undefined or non-LOCAL)
+  // retains the original strict check.
+  //
+  // OPERATOR NOTE: if you are using cloud BrowserBase sessions (not LOCAL mode),
+  // set STAGEHAND_ENV to something other than "LOCAL" (or leave it unset) and
+  // supply BROWSERBASE_API_KEY + BROWSERBASE_PROJECT_ID.
+  // To publish: update package.json name/version before next npm publish.
+  if ((config as any).env !== "LOCAL") {
+    if (!config.browserbaseApiKey) {
+      throw new Error("browserbaseApiKey is required");
+    }
+    if (!config.browserbaseProjectId) {
+      throw new Error("browserbaseProjectId is required");
+    }
   }
 
   const server = new McpServer({
