@@ -39,7 +39,7 @@ const defaultConfig: Config = {
     browserWidth: 1024,
     browserHeight: 768,
   },
-  modelName: "gemini-2.0-flash", // Default Model
+  modelName: process.env.STAGEHAND_MODEL_NAME || "gemini-2.0-flash", // Default model (env override: STAGEHAND_MODEL_NAME, parity with CUA_MODEL)
   cuaModel: process.env.CUA_MODEL || "anthropic/claude-sonnet-4-6",
   cuaApiKey: process.env.CUA_API_KEY,
   localBrowserLaunchOptions: {
@@ -48,19 +48,37 @@ const defaultConfig: Config = {
   },
 };
 
+// Resolve the model API key from env, preferring the key whose provider FAMILY matches the
+// model. A model-family-unaware chain (e.g. GEMINI||GOOGLE||OPENAI||ANTHROPIC) hands whatever
+// higher-priority provider key happens to be in the environment to a different provider's model,
+// which fails only at tool-call time as `invalid x-api-key`. Family-aware resolution prevents
+// that and is required for clean multi-provider operation.
+export function resolveModelApiKey(modelName?: string): string | undefined {
+  const m = (modelName || "").toLowerCase();
+  const googleKey =
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_API_KEY ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
+
+  if (m.includes("claude") || m.startsWith("anthropic")) return anthropicKey || undefined;
+  if (m.includes("gemini") || m.startsWith("google")) return googleKey || undefined;
+  if (m.includes("gpt") || m.startsWith("openai") || m.startsWith("o1") || m.startsWith("o3"))
+    return openaiKey || undefined;
+  // Unknown family: preserve legacy precedence for backward compatibility.
+  return googleKey || openaiKey || anthropicKey || undefined;
+}
+
 // Resolve final configuration by merging defaults, file config, and CLI options
 export async function resolveConfig(cliOptions: CLIOptions): Promise<Config> {
   const cliConfig = await configFromCLIOptions(cliOptions);
   // Order: Defaults < File Config < CLI Overrides
   const mergedConfig = mergeConfig(defaultConfig, cliConfig);
 
-  // --- Add Model API Key from Env Vars ---
+  // --- Add Model API Key from Env Vars (model-family-aware; see resolveModelApiKey) ---
   if (!mergedConfig.modelApiKey) {
-    mergedConfig.modelApiKey =
-      process.env.GEMINI_API_KEY ||
-      process.env.GOOGLE_API_KEY ||
-      process.env.OPENAI_API_KEY ||
-      process.env.ANTHROPIC_API_KEY;
+    mergedConfig.modelApiKey = resolveModelApiKey(mergedConfig.modelName);
   }
 
   // --------------------------------
