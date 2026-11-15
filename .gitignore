@@ -298,3 +298,46 @@ cython_debug/
 # MCP Registry https://github.com/modelcontextprotocol/registry
 .mcpregistry_github_token
 .mcpregistry_registry_token
+
+# KNOSSOS:START channel-ignores
+# Auto-managed by ari sync — channel directories are regenerated on every sync.
+# Each channel also has a provenance-driven .gitignore for per-file precision.
+.claude/
+.codex/
+.gemini/
+.mcp.json
+.mcp.json.meta
+.opencode/
+# KNOSSOS:END channel-ignores
+
+# KNOSSOS:START infra-ignores
+# Auto-managed by ari sync — knossos infrastructure directories.
+# Session state, internal framework state, and work product patterns.
+**/.sos/*
+!**/.sos/land/
+!**/.sos/land/**
+**/.ledge/*
+!**/.ledge/reviews/
+!**/.ledge/reviews/**
+!**/.ledge/specs/
+!**/.ledge/specs/**
+!**/.ledge/decisions/
+!**/.ledge/decisions/**
+!**/.ledge/shelf/
+!**/.ledge/shelf/**
+!**/.ledge/spikes/
+!**/.ledge/spikes/**
+!**/.ledge/proposals/
+!**/.ledge/proposals/**
+!**/.ledge/handoffs/
+!**/.ledge/handoffs/**
+# .knossos/worktrees/ — managed worktree pool; gitignored-by-construction.
+**/.knossos/
+**/.worktrees/
+.a8/
+.envrc
+.envrc.local
+.env/
+.env.keys
+secretspec.toml
+# KNOSSOS:END infra-ignores
