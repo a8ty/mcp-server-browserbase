@@ -1,6 +1,6 @@
 {
-  "name": "@knossos/mcp-stagehand",
-  "version": "1.0.0",
+  "name": "@autom8y/mcp-stagehand",
+  "version": "1.0.3",
   "description": "MCP server for AI browser automation via Stagehand — LOCAL mode + Anthropic CUA support. Fork of @browserbasehq/mcp-server-browserbase.",
   "mcpName": "io.github.autom8y/mcp-stagehand",
   "license": "Apache-2.0",
