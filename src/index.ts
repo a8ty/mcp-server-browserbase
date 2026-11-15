@@ -112,19 +112,24 @@ export const configSchema = z
 
 // Default function for Smithery
 export default function ({ config }: { config: z.infer<typeof configSchema> }) {
-  // WS-F defensive gate: in LOCAL mode (STAGEHAND_ENV=LOCAL, driven via CDP
-  // against a system Chrome binary) neither BROWSERBASE_API_KEY nor
-  // BROWSERBASE_PROJECT_ID is used for any Browserbase cloud call — the keys are
-  // purely passed through so the package's own startup checks don't abort.
-  // Gate the throws on env !== LOCAL so local-mode operators can run without
-  // Browserbase credentials. Cloud/remote mode (env undefined or non-LOCAL)
-  // retains the original strict check.
+  const internalConfig: Config = config as Config;
+
+  // WS-F gate: only BROWSERBASE (cloud) mode needs the Browserbase API key and
+  // project ID. LOCAL mode runs a local browser and never sends them (see
+  // createStagehandInstance in src/sessionManager.ts).
   //
-  // OPERATOR NOTE: if you are using cloud BrowserBase sessions (not LOCAL mode),
-  // set STAGEHAND_ENV to something other than "LOCAL" (or leave it unset) and
-  // supply BROWSERBASE_API_KEY + BROWSERBASE_PROJECT_ID.
-  // To publish: update package.json name/version before next npm publish.
-  if ((config as any).env !== "LOCAL") {
+  // CLI path (src/program.ts): resolveConfig sets `env` from --env or
+  // STAGEHAND_ENV, and an unset STAGEHAND_ENV means "LOCAL" (src/config.ts).
+  // resolveConfig fills placeholder keys only outside LOCAL mode, so this gate
+  // skips the strict check in LOCAL mode and a keyless LOCAL run can start.
+  //
+  // Smithery path: configSchema declares no `env`, so a config parsed by it
+  // carries none and the strict check runs, as it did before this gate.
+  //
+  // OPERATOR NOTE: for cloud sessions, set STAGEHAND_ENV=BROWSERBASE (or pass
+  // --env BROWSERBASE) and supply BROWSERBASE_API_KEY and
+  // BROWSERBASE_PROJECT_ID.
+  if (internalConfig.env !== "LOCAL") {
     if (!config.browserbaseApiKey) {
       throw new Error("browserbaseApiKey is required");
     }
@@ -146,8 +151,6 @@ export default function ({ config }: { config: z.infer<typeof configSchema> }) {
       tools: {},
     },
   });
-
-  const internalConfig: Config = config as Config;
 
   // Create the context, passing server instance and config
   const contextId = randomUUID();
