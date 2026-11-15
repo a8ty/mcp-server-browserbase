@@ -112,11 +112,30 @@ export const configSchema = z
 
 // Default function for Smithery
 export default function ({ config }: { config: z.infer<typeof configSchema> }) {
-  if (!config.browserbaseApiKey) {
-    throw new Error("browserbaseApiKey is required");
-  }
-  if (!config.browserbaseProjectId) {
-    throw new Error("browserbaseProjectId is required");
+  const internalConfig: Config = config as Config;
+
+  // WS-F gate: only BROWSERBASE (cloud) mode needs the Browserbase API key and
+  // project ID. LOCAL mode runs a local browser and never sends them (see
+  // createStagehandInstance in src/sessionManager.ts).
+  //
+  // CLI path (src/program.ts): resolveConfig sets `env` from --env or
+  // STAGEHAND_ENV, and an unset STAGEHAND_ENV means "LOCAL" (src/config.ts).
+  // resolveConfig fills placeholder keys only outside LOCAL mode, so this gate
+  // skips the strict check in LOCAL mode and a keyless LOCAL run can start.
+  //
+  // Smithery path: configSchema declares no `env`, so a config parsed by it
+  // carries none and the strict check runs, as it did before this gate.
+  //
+  // OPERATOR NOTE: for cloud sessions, set STAGEHAND_ENV=BROWSERBASE (or pass
+  // --env BROWSERBASE) and supply BROWSERBASE_API_KEY and
+  // BROWSERBASE_PROJECT_ID.
+  if (internalConfig.env !== "LOCAL") {
+    if (!config.browserbaseApiKey) {
+      throw new Error("browserbaseApiKey is required");
+    }
+    if (!config.browserbaseProjectId) {
+      throw new Error("browserbaseProjectId is required");
+    }
   }
 
   const server = new McpServer({
@@ -132,8 +151,6 @@ export default function ({ config }: { config: z.infer<typeof configSchema> }) {
       tools: {},
     },
   });
-
-  const internalConfig: Config = config as Config;
 
   // Create the context, passing server instance and config
   const contextId = randomUUID();
